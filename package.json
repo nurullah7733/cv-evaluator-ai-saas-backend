@@ -1,0 +1,42 @@
+{
+  "name": "resume-evaluator",
+  "version": "1.0.0",
+  "description": "Ai Resume Evaluator",
+  "license": "ISC",
+  "author": "Md Nurullah",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@aws-sdk/lib-storage": "^3.864.0",
+    "@clerk/express": "^1.7.18",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dayjs": "^1.11.13",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "express-xss-sanitizer": "^2.0.0",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "lodash": "^4.17.21",
+    "mammoth": "^1.10.0",
+    "mongo-sanitize": "^1.1.0",
+    "mongoose": "^8.17.0",
+    "multer": "^2.0.2",
+    "node-global-storage": "^3.0.1",
+    "nodemon": "^3.1.10",
+    "openai": "^5.12.2",
+    "pdf-parse": "^1.1.1",
+    "pdfkit": "^0.17.2",
+    "stripe": "^18.5.0",
+    "zod": "^3.25.76"
+  }
+}

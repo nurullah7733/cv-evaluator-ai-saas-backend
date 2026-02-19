@@ -1,0 +1,823 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ResumeAnalysis",
+  "type": "object",
+  "required": [
+    "actor",
+    "scores",
+    "persona",
+    "industry",
+    "jdText",
+    "region",
+    "desiredSalary",
+    "personaInferenceConfidence",
+    "breakdown",
+    "jobFit",
+    "interview",
+    "salary",
+    "suggestions",
+    "optimization",
+    "careerPaths",
+    "trends",
+    "marketInsights",
+    "resumeSections",
+    "premiumInsights",
+    "improvements",
+    "modelMeta",
+    "managerView"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "actor": { "type": "string", "enum": ["candidate", "hiring_manager"] },
+    "persona": {
+      "type": ["string", "null"],
+      "enum": ["entry_level", "professional_level", null]
+    },
+    "industry": { "type": ["string", "null"] },
+    "jdText": { "type": ["string", "null"] },
+    "region": { "type": ["string", "null"] },
+    "desiredSalary": { "type": ["integer", "null"] },
+    "personaInferenceConfidence": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+
+    "scores": {
+      "type": "object",
+      "required": ["overall"],
+      "additionalProperties": false,
+      "properties": {
+        "overall": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+
+    "breakdown": {
+      "type": "object",
+      "required": ["structure", "language", "keywords", "experience"],
+      "additionalProperties": false,
+      "properties": {
+        "structure": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "language": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "keywords": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "experience": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+
+    "jobFit": {
+      "type": "object",
+      "required": ["score", "keywordMatch", "skillsAlignment", "benchmark"],
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "keywordMatch": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "skillsAlignment": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "benchmark": { "type": ["string", "null"] }
+      }
+    },
+
+    "interview": {
+      "type": "object",
+      "required": ["probability", "rationale", "benchmark", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "probability": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "rationale": { "type": ["string", "null"] },
+        "benchmark": { "type": ["string", "null"] },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "salary": {
+      "type": "object",
+      "required": [
+        "min",
+        "max",
+        "currency",
+        "confidence",
+        "region",
+        "desired",
+        "position",
+        "deltaToMedianPct",
+        "recommendedAsk"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": ["integer", "null"] },
+        "max": { "type": ["integer", "null"] },
+        "currency": { "type": ["string", "null"] },
+        "confidence": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "region": { "type": "string" },
+        "desired": { "type": ["integer", "null"] },
+        "position": {
+          "type": ["string", "null"],
+          "enum": [
+            "below_market",
+            "near_median",
+            "above_median",
+            "premium",
+            null
+          ]
+        },
+        "deltaToMedianPct": { "type": ["number", "null"] },
+        "recommendedAsk": {
+          "type": ["object", "null"],
+          "required": ["min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": ["integer", "null"] },
+            "max": { "type": ["integer", "null"] }
+          }
+        }
+      }
+    },
+
+    "suggestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "targetSection", "priority"],
+        "additionalProperties": false,
+        "properties": {
+          "text": { "type": "string" },
+          "targetSection": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "experience",
+              "education",
+              "projects",
+              "skills",
+              "general",
+              "certifications",
+              "awards"
+            ]
+          },
+          "priority": { "type": "integer", "minimum": 1, "maximum": 3 }
+        }
+      }
+    },
+
+    "optimization": {
+      "type": "object",
+      "required": [
+        "certifications",
+        "languages",
+        "skills",
+        "achievements",
+        "keywordGaps"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "certifications": { "type": "array", "items": { "type": "string" } },
+        "languages": { "type": "array", "items": { "type": "string" } },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "achievements": { "type": "array", "items": { "type": "string" } },
+        "keywordGaps": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "careerPaths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["industry", "roles", "accelerators"],
+        "additionalProperties": false,
+        "properties": {
+          "industry": { "type": "string" },
+          "roles": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 2,
+            "maxItems": 6
+          },
+          "accelerators": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+
+    "trends": {
+      "type": "object",
+      "required": ["direction", "note", "monthlyGrowth"],
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": ["up", "down", "flat", "unknown"]
+        },
+        "note": { "type": ["string", "null"] },
+        "monthlyGrowth": { "type": ["string", "null"] }
+      }
+    },
+
+    "marketInsights": {
+      "type": "object",
+      "required": [
+        "regionalDemand",
+        "competitionLevel",
+        "optimalTiming",
+        "demandDrivers"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "regionalDemand": { "type": "string" },
+        "competitionLevel": {
+          "type": "string",
+          "enum": ["High", "Medium", "Low"]
+        },
+        "optimalTiming": { "type": ["string", "null"] },
+        "demandDrivers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "resumeSections": {
+      "type": "object",
+      "required": [
+        "personalInfo",
+        "summary",
+        "experience",
+        "education",
+        "skills",
+        "projects",
+        "certifications",
+        "awards",
+        "publications",
+        "volunteer",
+        "additional"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "personalInfo": {
+          "type": ["object", "null"],
+          "required": [
+            "fullName",
+            "email",
+            "phone",
+            "location",
+            "linkedin",
+            "github",
+            "portfolio"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "fullName": { "type": ["string", "null"] },
+            "email": { "type": ["string", "null"] },
+            "phone": { "type": ["string", "null"] },
+            "location": { "type": ["string", "null"] },
+            "linkedin": { "type": ["string", "null"] },
+            "github": { "type": ["string", "null"] },
+            "portfolio": { "type": ["string", "null"] }
+          }
+        },
+        "summary": {
+          "type": ["object", "null"],
+          "required": ["content", "experienceYears", "keyPoints"],
+          "additionalProperties": false,
+          "properties": {
+            "content": { "type": ["string", "null"] },
+            "experienceYears": { "type": ["integer", "null"] },
+            "keyPoints": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "experience": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": [
+              "jobTitle",
+              "company",
+              "location",
+              "duration",
+              "startDate",
+              "endDate",
+              "current",
+              "responsibilities",
+              "achievements"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "jobTitle": { "type": ["string", "null"] },
+              "company": { "type": ["string", "null"] },
+              "location": { "type": ["string", "null"] },
+              "duration": { "type": ["string", "null"] },
+              "startDate": { "type": ["string", "null"] },
+              "endDate": { "type": ["string", "null"] },
+              "current": { "type": "boolean" },
+              "responsibilities": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "achievements": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "education": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": [
+              "degree",
+              "institution",
+              "location",
+              "graduationYear",
+              "gpa",
+              "relevantCoursework",
+              "honors"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "degree": { "type": ["string", "null"] },
+              "institution": { "type": ["string", "null"] },
+              "location": { "type": ["string", "null"] },
+              "graduationYear": { "type": ["string", "null"] },
+              "gpa": { "type": ["string", "null"] },
+              "relevantCoursework": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "honors": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "skills": {
+          "type": ["object", "null"],
+          "required": [
+            "technical",
+            "programming",
+            "frameworks",
+            "databases",
+            "tools",
+            "soft",
+            "languages"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "technical": { "type": "array", "items": { "type": "string" } },
+            "programming": { "type": "array", "items": { "type": "string" } },
+            "frameworks": { "type": "array", "items": { "type": "string" } },
+            "databases": { "type": "array", "items": { "type": "string" } },
+            "tools": { "type": "array", "items": { "type": "string" } },
+            "soft": { "type": "array", "items": { "type": "string" } },
+            "languages": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "projects": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "description",
+              "technologies",
+              "url",
+              "startDate",
+              "endDate",
+              "highlights"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": ["string", "null"] },
+              "description": { "type": ["string", "null"] },
+              "technologies": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "url": { "type": ["string", "null"] },
+              "startDate": { "type": ["string", "null"] },
+              "endDate": { "type": ["string", "null"] },
+              "highlights": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "certifications": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "issuer",
+              "dateIssued",
+              "expiryDate",
+              "credentialId",
+              "url"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": ["string", "null"] },
+              "issuer": {
+                "anyOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "type": "string" } },
+                  { "type": "null" }
+                ]
+              },
+              "dateIssued": { "type": ["string", "null"] },
+              "expiryDate": { "type": ["string", "null"] },
+              "credentialId": { "type": ["string", "null"] },
+              "url": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "awards": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": ["title", "issuer", "date", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": ["string", "null"] },
+              "issuer": { "type": ["string", "null"] },
+              "date": { "type": ["string", "null"] },
+              "description": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "publications": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": ["title", "publisher", "date", "url", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": ["string", "null"] },
+              "publisher": { "type": ["string", "null"] },
+              "date": { "type": ["string", "null"] },
+              "url": { "type": ["string", "null"] },
+              "description": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "volunteer": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": [
+              "organization",
+              "role",
+              "startDate",
+              "endDate",
+              "description"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "organization": { "type": ["string", "null"] },
+              "role": { "type": ["string", "null"] },
+              "startDate": { "type": ["string", "null"] },
+              "endDate": { "type": ["string", "null"] },
+              "description": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "additional": {
+          "type": ["object", "null"],
+          "required": ["interests", "hobbies", "references", "other"],
+          "additionalProperties": false,
+          "properties": {
+            "interests": { "type": "array", "items": { "type": "string" } },
+            "hobbies": { "type": "array", "items": { "type": "string" } },
+            "references": { "type": "array", "items": { "type": "string" } },
+            "other": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+
+    "improvements": {
+      "type": "object",
+      "required": [
+        "sectionsOrder",
+        "summary",
+        "experience",
+        "skills",
+        "projects",
+        "education",
+        "certifications",
+        "awards",
+        "ops"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sectionsOrder": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "summary",
+              "experience",
+              "skills",
+              "projects",
+              "education",
+              "certifications",
+              "awards"
+            ]
+          }
+        },
+
+        "summary": {
+          "type": "object",
+          "required": ["before", "after", "keywordsAdded"],
+          "additionalProperties": false,
+          "properties": {
+            "before": { "type": ["string", "null"] },
+            "after": { "type": "string" },
+            "keywordsAdded": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+
+        "experience": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "index",
+              "company",
+              "beforeBullets",
+              "afterBullets",
+              "metricsAdded",
+              "impactScore"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "index": { "type": "integer", "minimum": 0 },
+              "company": { "type": "string" },
+              "beforeBullets": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "afterBullets": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "metricsAdded": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "impactScore": { "type": "integer", "minimum": 0, "maximum": 100 }
+            }
+          }
+        },
+
+        "skills": {
+          "type": "object",
+          "required": ["keywordGaps"],
+          "additionalProperties": false,
+          "properties": {
+            "afterGrouped": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "keywordGaps": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+
+        "projects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "afterDesc", "impact", "tech", "url"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "afterDesc": { "type": ["string", "null"] },
+              "impact": { "type": ["string", "null"] },
+              "tech": { "type": "array", "items": { "type": "string" } },
+              "url": { "type": ["string", "null"] }
+            }
+          }
+        },
+
+        "education": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["degree", "institution", "graduationYear"],
+            "additionalProperties": false,
+            "properties": {
+              "degree": { "type": ["string", "null"] },
+              "institution": { "type": ["string", "null"] },
+              "graduationYear": { "type": ["string", "null"] }
+            }
+          }
+        },
+
+        "certifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "issuer",
+              "dateIssued",
+              "expiryDate",
+              "credentialId",
+              "url"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "issuer": {
+                "anyOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "type": "string" } },
+                  { "type": "null" }
+                ]
+              },
+              "dateIssued": { "type": ["string", "null"] },
+              "expiryDate": { "type": ["string", "null"] },
+              "credentialId": { "type": ["string", "null"] },
+              "url": { "type": ["string", "null"] }
+            }
+          }
+        },
+
+        "awards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "issuer", "date"],
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": "string" },
+              "issuer": { "type": ["string", "null"] },
+              "date": { "type": ["string", "null"] }
+            }
+          }
+        },
+
+        "ops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["op", "path", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "op": { "type": "string", "enum": ["add", "replace", "remove"] },
+              "path": { "type": "string" },
+              "value": {
+                "anyOf": [
+                  { "type": "string" },
+                  { "type": "number" },
+                  { "type": "boolean" },
+                  { "type": "object", "additionalProperties": false },
+                  { "type": "array", "items": { "type": "string" } },
+                  { "type": "null" }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "premiumInsights": {
+      "type": "object",
+      "required": [
+        "atsCoverage",
+        "skillGaps",
+        "impact",
+        "compPercentile",
+        "salaryPercentiles",
+        "trendDrilldown",
+        "certsAndCourses",
+        "recruiterPitch",
+        "shortlist",
+        "redFlags"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "atsCoverage": {
+          "type": "object",
+          "required": [
+            "exactPct",
+            "partialPct",
+            "stemPct",
+            "missing",
+            "top3Actions"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "exactPct": { "type": "number", "minimum": 0, "maximum": 100 },
+            "partialPct": { "type": "number", "minimum": 0, "maximum": 100 },
+            "stemPct": { "type": "number", "minimum": 0, "maximum": 100 },
+            "missing": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["term", "weight"],
+                "additionalProperties": false,
+                "properties": {
+                  "term": { "type": "string" },
+                  "weight": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "top3Actions": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "skillGaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skill", "severity"],
+            "additionalProperties": false,
+            "properties": {
+              "skill": { "type": "string" },
+              "severity": { "type": "number", "minimum": 0, "maximum": 100 }
+            }
+          }
+        },
+        "impact": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["section", "score", "evidence"],
+            "additionalProperties": false,
+            "properties": {
+              "section": { "type": "string" },
+              "score": { "type": "number", "minimum": 0, "maximum": 100 },
+              "evidence": { "type": "string" }
+            }
+          }
+        },
+        "compPercentile": { "type": "number", "minimum": 0, "maximum": 100 },
+        "salaryPercentiles": {
+          "type": "object",
+          "required": ["p25", "p50", "p75", "currency"],
+          "additionalProperties": false,
+          "properties": {
+            "p25": { "type": "number" },
+            "p50": { "type": "number" },
+            "p75": { "type": "number" },
+            "currency": { "type": "string" }
+          }
+        },
+        "trendDrilldown": {
+          "type": "object",
+          "required": ["sparkline", "risingSkills"],
+          "additionalProperties": false,
+          "properties": {
+            "sparkline": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 12,
+              "maxItems": 12
+            },
+            "risingSkills": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "certsAndCourses": { "type": "array", "items": { "type": "string" } },
+        "recruiterPitch": { "type": "array", "items": { "type": "string" } },
+        "shortlist": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "requirements"],
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": "string" },
+              "requirements": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "redFlags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "managerView": {
+      "type": ["object", "null"],
+      "required": ["summary", "redFlags", "mustHaveCoverage"],
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": ["string", "null"] },
+        "redFlags": { "type": "array", "items": { "type": "string" } },
+        "mustHaveCoverage": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+
+    "modelMeta": {
+      "type": "object",
+      "required": ["provider", "model", "promptVersion"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "model": { "type": "string" },
+        "promptVersion": { "type": "string" }
+      }
+    }
+  }
+}
