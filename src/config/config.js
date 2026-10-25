@@ -16,6 +16,13 @@ const config = {
       apiKey: process.env.MISTRAL_API_KEY || "",
       model: process.env.MISTRAL_MODEL || "mistral-small-latest",
     },
+    gemini: {
+      baseURL:
+        process.env.GEMINI_BASE_URL ||
+        "https://generativelanguage.googleapis.com/v1beta/openai/",
+      apiKey: process.env.GEMINI_API_KEY || "",
+      model: process.env.GEMINI_MODEL,
+    },
   },
 };
 

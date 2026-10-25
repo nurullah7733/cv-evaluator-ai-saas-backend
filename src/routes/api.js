@@ -41,7 +41,7 @@ router.post(
   verifyAuthMiddleware(),
   checkUserTierAndFilterData(),
   uploadFiles.single("file"),
-  resumeAnalysisController
+  resumeAnalysisController,
 );
 
 // resume re-analysis route
@@ -49,20 +49,20 @@ router.post(
   "/resume-reanalysis",
   verifyAuthMiddleware(),
   checkUserTierAndFilterData(),
-  resumeReAnalysisController
+  resumeReAnalysisController,
 );
 
 router.get(
   "/resume-history/:resumeId",
   verifyAuthMiddleware(),
   // checkUserTierAndFilterData(), its not need its just simple data.
-  getAnalysisHistoryController
+  getAnalysisHistoryController,
 );
 router.get(
   "/compare/:resumeId/:compareWith",
   verifyAuthMiddleware(),
   // checkUserTierAndFilterData(), its not needed becouse (structure different and its hidden button for free user in frontend)
-  getDetailedComparisonController
+  getDetailedComparisonController,
 );
 
 // get analysis version by analysisId
@@ -70,14 +70,14 @@ router.get(
   "/get-analysis/:analysisId",
   verifyAuthMiddleware(),
   checkUserTierAndFilterData(),
-  getAnalysisVersionController
+  getAnalysisVersionController,
 );
 
 // resume list route
 router.get(
   "/all-resumes/:pageNo/:perPage/:searchKeyword",
   verifyAuthMiddleware(),
-  getAllResumesController
+  getAllResumesController,
 );
 
 // resume details by id route
@@ -85,15 +85,15 @@ router.get(
   "/get-resume-details-by-id/:id",
   verifyAuthMiddleware(),
   checkUserTierAndFilterData(),
-  getDetailsAResumesController
+  getDetailsAResumesController,
 );
 
 // resume details by id route
 router.get(
   "/delete-resume-by-id/:id",
-  // verifyAuthMiddleware(),
+  verifyAuthMiddleware(),
   // checkUserTierAndFilterData(),
-  deleteAResumesController
+  deleteAResumesController,
 );
 
 // resume details by id route
@@ -101,21 +101,21 @@ router.get(
   "/export-pdf/:analysisId",
   verifyAuthMiddleware(),
   checkUserTierAndFilterData(),
-  exportResumePdfController
+  exportResumePdfController,
 );
 
 // Stripe create checkout session
 router.post(
   "/stripe-create-checkout-session",
   verifyAuthMiddleware(),
-  createCheckoutSessionController
+  createCheckoutSessionController,
 );
 
 // Stripe create billing portal session
 router.post(
   "/stripe-create-billing-portal-session",
   verifyAuthMiddleware(),
-  createBillingPortalSessionController
+  createBillingPortalSessionController,
 );
 
 // Stripe webhook move to app.js

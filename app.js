@@ -1,5 +1,5 @@
 const express = require("express");
-require("dotenv").config();
+require("dotenv").config({ path: require("path").join(__dirname, ".env") });
 const app = new express();
 const router = require("./src/routes/api");
 const bodyParser = require("body-parser");
@@ -19,11 +19,16 @@ const {
   stripeWebhookController,
 } = require("./src/controllers/stripeController/stripeWebhooksController");
 app.set("trust proxy", 1);
+
+// DNS Resolver Implement
+const dns = require("node:dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
 // Stripe raw body for webhook ( this must be declared before express.json() )
 app.post(
   "/stripe-webhook",
   bodyParser.raw({ type: "application/json" }),
-  stripeWebhookController
+  stripeWebhookController,
 );
 
 // Security Middleware Implement
@@ -33,7 +38,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use(helmet());
@@ -67,8 +72,8 @@ const limiter = rateLimit({ windowMs: 15 * 60 * 100, max: 3000 });
 app.use(limiter);
 
 // ******* its for cloud database *******
-let URI =
-  "mongodb+srv://mnurullah:<db_password>@cluster0.ftopmqc.mongodb.net/cvevaluatordb?retryWrites=true&w=majority&appName=Cluster0";
+const URI = process.env.DATABASE_URI;
+if (!URI) throw new Error("DATABASE_URI is required in backend environment.");
 
 let OPTION = {
   user: process.env.DATABASE_USER,

@@ -7,8 +7,11 @@ const safeJson = require("../../utils/safeJson");
 
 const mongoose = require("mongoose");
 
-const { buildObjectKey } = require("../../utils/buildObjectKeyForPdfName");
-const { uploadFileToS3, s3, deleteFileFromS3 } = require("../../utils/s3");
+const { s3, deleteFileFromS3 } = require("../../utils/s3");
+const {
+  uploadFileToCloudinary,
+  deleteFileFromCloudinary,
+} = require("../../utils/cloudinary");
 const { analysisZ } = require("../../zod/analysisSchema");
 const analysisModel = require("../../models/analysisModel");
 const resumeModel = require("../../models/resumeModel");
@@ -31,10 +34,12 @@ exports.resumeAnalysisController = async (req, res) => {
   const { jdText, region, industry, actor, persona, desiredSalary, llmName } =
     req.body;
 
-  let tmpPath;
-  const session = await mongoose.startSession(); // Start Transaction session
+  let tmpPath = req.file?.path;
+  let uploadResult;
+  let session;
   let transationStarted = false;
   try {
+    session = await mongoose.startSession();
     const userId = req?.user?.userId;
 
     if (!req.file) {
@@ -70,7 +75,7 @@ exports.resumeAnalysisController = async (req, res) => {
       industry,
       actor,
       persona,
-      desiredSalary
+      desiredSalary,
     );
     const { provider, text } = await chatGenerate({
       messages,
@@ -80,20 +85,8 @@ exports.resumeAnalysisController = async (req, res) => {
 
     const cleanJson = safeJson(text);
 
-    const uploadResult = await uploadFileToS3(
-      s3,
-      tmpPath,
-      process.env.HETZNER_S3_BUCKET,
-      buildObjectKey({
-        userId: userId,
-        fileOriginalName: req.file.originalname,
-      }),
-      req.file.mimetype,
-      userId,
-      req.file.originalname
-    );
-
     const parsed = analysisZ.parse(cleanJson);
+    uploadResult = await uploadFileToCloudinary(tmpPath, req.file.originalname);
     parsed.filename = req?.file?.filename;
     parsed.version = 1;
     parsed.isLatest = true;
@@ -109,7 +102,9 @@ exports.resumeAnalysisController = async (req, res) => {
           clerkUserId: userId,
           provider: provider,
           filename: req?.file?.filename,
-          fileUrl: uploadResult?.Location,
+          fileUrl: uploadResult.fileUrl,
+          storageProvider: "cloudinary",
+          storagePublicId: uploadResult.publicId,
           originalFilename: req?.file?.originalname,
           fileType: req?.file?.mimetype,
           size: req?.file?.size,
@@ -139,7 +134,7 @@ exports.resumeAnalysisController = async (req, res) => {
           },
         },
       ],
-      { session }
+      { session },
     );
 
     // STEP 2: Analysis save (WITH resumeId)
@@ -161,17 +156,19 @@ exports.resumeAnalysisController = async (req, res) => {
         latestAnalysisId: saveAnalysisToDBResult._id,
         $push: { analysisHistory: saveAnalysisToDBResult._id },
       },
-      { session }
+      { session },
     );
 
     // Transaction commit
     await session.commitTransaction();
     transationStarted = false;
+    const fileUrl = uploadResult.fileUrl;
+    uploadResult = null;
 
     return res.json({
       id: saveResumeToDBResult?._id,
       analysisId: saveAnalysisToDBResult?._id,
-      fileUrl: uploadResult?.Location,
+      fileUrl,
       name: req.file.originalname,
       storedAs: req.file.filename,
       path: req.file.path,
@@ -184,12 +181,19 @@ exports.resumeAnalysisController = async (req, res) => {
   } catch (e) {
     // If Error transaction rollback
     if (transationStarted) {
-      await session.abortTransaction();
+      await session.abortTransaction().catch((error) => {
+        console.error("Failed to abort resume transaction:", error.message);
+      });
+    }
+    if (uploadResult && !e.hasErrorLabel?.("UnknownTransactionCommitResult")) {
+      await deleteFileFromCloudinary(uploadResult.publicId).catch((error) => {
+        console.error("Failed to clean up Cloudinary upload:", uploadResult.publicId, error.message);
+      });
     }
     console.error("Transaction failed:", e);
     return res.status(400).json({ status: "fail", data: e.message });
   } finally {
-    session.endSession();
+    await session?.endSession();
 
     // Temp file delete
     try {
@@ -273,7 +277,7 @@ exports.resumeReAnalysisController = async (req, res) => {
 
     const materializedMessages = MaterializePromptBuildMessages(
       resumeRawClnText,
-      prevImprovementsJsonString
+      prevImprovementsJsonString,
     );
 
     const { provider: materializedProvider, text: materializedText } =
@@ -295,7 +299,7 @@ exports.resumeReAnalysisController = async (req, res) => {
       actor,
       persona,
       desiredSalary,
-      prevImprovementsJsonString
+      prevImprovementsJsonString,
     );
 
     const { provider: reAnalysisProvider, text: reAnalysisText } =
@@ -317,7 +321,7 @@ exports.resumeReAnalysisController = async (req, res) => {
     await analysisModel.updateOne(
       { _id: previousAnalysis[0]._id },
       { isLatest: false },
-      { session }
+      { session },
     );
 
     // STEP 8: New analysis save
@@ -354,7 +358,7 @@ exports.resumeReAnalysisController = async (req, res) => {
 
       await analysisModel.deleteMany(
         { _id: { $in: idsToDelete } },
-        { session }
+        { session },
       );
       console.log(`Deleted ${idsToDelete.length} old analysis versions`);
     }
@@ -378,7 +382,7 @@ exports.resumeReAnalysisController = async (req, res) => {
         "target.persona": parsed?.persona,
         "target.lastDesiredSalary": parsed?.desiredSalary,
       },
-      { session }
+      { session },
     );
 
     //  STEP 11: Transaction commit
@@ -523,7 +527,7 @@ exports.getDetailedComparisonController = async (req, res) => {
     }
 
     const currentAnalysis = await analysisModel.findById(
-      resume.latestAnalysisId
+      resume.latestAnalysisId,
     );
 
     let previousAnalysis;
@@ -545,7 +549,7 @@ exports.getDetailedComparisonController = async (req, res) => {
 
     const detailedComparison = generateDetailedComparison(
       previousAnalysis,
-      currentAnalysis
+      currentAnalysis,
     );
 
     return res.json({
@@ -601,7 +605,7 @@ exports.getDetailsAResumesController = async (req, res) => {
     const resumesData = await getDetailsByIdOneJoinService(
       req,
       resumeModel,
-      joinStage1
+      joinStage1,
     );
 
     return res.status(200).json(resumesData);
@@ -617,7 +621,7 @@ exports.deleteAResumesController = async (req, res) => {
   try {
     const resumeData = await resumeModel.find({
       _id: id,
-      clerkUserId: "user_31H14u1TOqssIHCya22SMsgU2Sf",
+      clerkUserId: req.user.userId,
     });
 
     const fileUrl = resumeData[0]?.fileUrl;
@@ -627,19 +631,22 @@ exports.deleteAResumesController = async (req, res) => {
         .json({ status: "fail", data: "Resume not found or user not match." });
     }
 
+    if (resumeData[0].storageProvider === "cloudinary") {
+      await deleteFileFromCloudinary(resumeData[0].storagePublicId);
+    } else {
+      const url = new URL(fileUrl);
+      const objectKey = decodeURIComponent(url.pathname.split("/").slice(2).join("/"));
+      if (objectKey) {
+        await deleteFileFromS3(s3, process.env.HETZNER_S3_BUCKET, objectKey);
+      }
+    }
+
     // Delete all analysis versions for this resume
     await analysisModel.deleteMany({
       _id: { $in: resumeData[0]?.analysisHistory },
     });
 
     await resumeModel.findByIdAndDelete(id);
-    const url = new URL(fileUrl);
-    const objectKey = url.pathname.split("/").slice(2).join("/");
-
-    // delete file form hetzner s3 storage
-    if (objectKey) {
-      await deleteFileFromS3(s3, process.env.HETZNER_S3_BUCKET, objectKey);
-    }
 
     return res.status(200).json({
       status: "success",

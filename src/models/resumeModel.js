@@ -13,6 +13,8 @@ const ResumeSchema = new Schema(
     filename: { type: String, default: null, trim: true },
     originalFilename: { type: String, default: null, trim: true },
     fileUrl: { type: String, default: null, trim: true },
+    storageProvider: { type: String, enum: ["s3", "cloudinary"], default: "s3" },
+    storagePublicId: { type: String, default: null },
     fileType: { type: String, default: null, trim: true },
     size: { type: Number, default: null, min: 0 },
 
